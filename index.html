@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Cassandra for craftsmen developers</title>
+
+		<meta name="description" content="Cassandra for craftsmen developers">
+		<meta name="author" content="Felipe Fernández">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/moon.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h1>Cassandra for craftsmen developers</h1>
+					<p>
+						<small>Created by <a href="http://felipefzdz.github.io">Felipe Fernández</a> / <a href="https://twitter.com/felipefzdz">@felipefzdz</a></small>
+					</p>
+				</section>
+
+				<section>
+					<h2>About Me</h2>
+					<h4>Felipe Fernández</h4>
+					<ul>
+						<li>Work as Software Craftsman for <a href="http://codurance.com">Codurance</a></li>
+						<li>Currently with <a href="http://crowdmix.me">Crowdmix</a></li>
+						<li><a href="http://codurance.com/blog/author/felipe-fern%C3%A1ndez"> Blog </a></li>
+						<li>Twitter: <a href="https://twitter.com/felipefzdz">@felipefzdz</a></li>
+					</ul>
+				</section>
+
+				<section>
+					<section>
+						<h2>Some craftsmanship related topics</h2>
+						<ul>
+							<li>BDD</li>
+							<li>Outside-in development</li>
+							<li>Focus on delivery</li>
+							<li>Minimise waste</li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+					<h2>About the talk</h2>
+					<ul style='list-style-type: none;'>
+						<li>1. Cassandra rationale</li>
+						<li>2. Cassandra internals</li>
+						<li>3. Data modeling</li>
+					</ul>
+				</section>
+
+
+				<section>
+					<section>
+						<h2>1. Cassandra rationale</h2>
+						<aside class="notes">
+							<ul>
+								<li>Modern problems like: scalability, high availability, locality, low latency</li>
+								<li>Scalability because of internet scale</li>
+								<li>HA because of internet timezones</li>
+								<li>Locality because of speed of light</li>
+								<li>Low latency because of millenials</li>
+							</ul>
+						</aside>
+					</section>
+					<section>
+						<h5 style="opacity:0.2">Cassandra rationale</h5>
+						<h2>RDBMS Approach to modern world challenges</h2>
+						<ul>
+							<li>Third normal form</li>
+							<li>Favour space over time</li>
+						</ul>
+						<aside class="notes">
+							<ul>
+							  <li><a href="http://stackoverflow.com/questions/15274985/normalize-table-to-3rd-normal-form">Stack overflow to the rescue</a></li>
+								<li>NF1: A table cell must not contain more than one value.</li>
+								<li>NF2: NF1, plus all non-primary-key columns must depend on all primary key columns.</li>
+								<li>NF3: NF2, plus non-primary key columns may not depend on each other.</li>
+							</ul>
+						</aside>
+					</section>
+					<section>
+						<h5 style="opacity:0.2">Cassandra rationale</h5>
+						<h2>ACID Properties</h2>
+						<ul>
+							<li>Atomicity</li>
+							<li>Consistency</li>
+							<li>Isolation</li>
+							<li>Durability</li>
+						</ul>
+						<aside class="notes">
+							<ul>
+								<li>ACID properties are referred to a single operation or to transaction</li>
+								<li>Those properties are a safety net, but they are not for free</li>
+								<li>They are really hard to implement in a distributed system.</li>
+							</ul>
+						</aside>
+					</section>
+					<section>
+						<h5 style="opacity:0.2">Cassandra rationale</h5>
+						<h2>Relational Data Modeling</h2>
+						<ul>
+							<li>Denormalisation</li>
+							<li>Referential integrity</li>
+							<li>Strong uniqueness</li>
+							<li>Indexes</li>
+							<li>Joins</li>
+							<li>Aggregations</li>
+						</ul>
+						<aside class="notes">
+							<ul>
+								<li>Our tables have strong connection with our entity/relationship model</li>
+								<li>Application can be more relaxed about checking referential integrity as the DB will fail explicitly</li>
+								<li>Primary key serves for the purpose of uniqueness, again DB will fail</li>
+								<li>Indexes give us flexibility when we design our tables, as we can add them whenever we want</li>
+								<li>If the data is not contained in a single table we need to join some of them, creating some locks and likely contention over those resources</li>
+								<li>There are several aggregation functions like: min, max, count, sum...</li>
+							</ul>
+						</aside>
+					</section>
+					<section>
+						<h5 style="opacity:0.2">Cassandra rationale</h5>
+						<h2>RDBMS Problems</h2>
+						<ul>
+							<li>Scale up</li>
+							<li>Sharding</li>
+							<li>Availability</li>
+							<li>Locality</li>
+						</ul>
+						<aside class="notes">
+							<ul>
+								<li>Usual approach of RDBMS is scaling up buying more resources for a single machine, that's expensive and hits a limit quite soon</li>
+								<li>A database shard is a horizontal partition of data. Sharding makes the system tolerant to partitioning</li>
+								<li>If you stick with spof is not possible to achive HA. Distributed ACID is really hard to achieve. </li>
+								<li>Again if you have a single instance you can't colocate data to different regions</li>
+							</ul>
+						</aside>
+					</section>
+					<section>
+						<h5 style="opacity:0.2">Cassandra rationale</h5>
+						<h2>Cassandra to the rescue</h2>
+						<ul>
+							<li>Distributed peer to peer architecture</li>
+							<li>Scale out</li>
+							<li>Low latency</li>
+							<li>CAP theorem</li>
+						</ul>
+						<aside class="notes">
+							<ul>
+								<li>Non master/slave, so no spof.</li>
+								<li>Commodity servers, perfect for cloud computing</li>
+								<li>Denormalisation and tables based on queries. Time over space trade-off</li>
+								<li>It drops consistency over partition tolerancy and availability. It provides tunable consistency though.</li>
+							</ul>
+						</aside>
+					</section>
+					<section>
+						<h5 style="opacity:0.2">Cassandra rationale</h5>
+						<h2>Right tool for the right job</h2>
+						<ul>
+							<li>Big data</li>
+							<li>Higher storage costs</li>
+							<li>Change mindset</li>
+						</ul>
+						<aside class="notes">
+							<ul>
+								<li>If your data fits in a machine is not big data. Avoid the overkill and complications of distributed systems if possible</li>
+								<li>Storage is cheaper and cheaper, but it's important to note that we're trading time for space, no such thing as free lunch</li>
+								<li>You can't simply plug-in cassandra into your old rdbms based system. A massive refactor needs to be done.</li>
+							</ul>
+						</aside>
+					</section>
+				</section>
+
+
+				<section>
+					<section>
+						<h2>2. Cassandra internals</h2>
+						<aside class="notes">
+								<ul>
+									<li>Based on Google BigTable and Amazon Dynamo.</li>
+									<li>Used by Netflix or Spotify.</li>
+									<li>Open source project backed by Datastax.</li>
+								</ul>
+							</aside>
+					</section>
+					<section>
+						<h5 style="opacity:0.2">Cassandra internals</h5>
+						<h2>Distribution internals</h2>
+						<ul>
+							<li>Data is partitioned around the ring</li>
+							<li>Coordinator node</li>
+							<li>Replication factor</li>
+							<li>Consistency level</li>
+						</ul>
+						<aside class="notes">
+							<ul>
+								<li>Every partition has a key, using some hash algorithm, we can get the location of the node where that data will live.</li>
+								<li>Clients talk with a coordinator node, that is randomly assigned every time. That coordinator apply the hash function.</li>
+								<li>RF per keyspace. We need to have different replicas to ensure high availability even when some node is down.</li>
+								<li>CL per query/command. Coordinator will wait until required number of nodes ack the request. Could be ONE, QUORUM, ALL...</li>
+							</ul>
+						</aside>
+					</section>
+					<section>
+						<h5 style="opacity:0.2">Cassandra internals</h5>
+						<h2>Distribution internals</h2>
+						<ul>
+							<li>Column family</li>
+							<li>Keyspace</li>
+							<li>Node</li>
+							<li>Rack</li>
+							<li>Data center</li>
+							<li>Cluster</li>
+						</ul>
+						<aside class="notes">
+							<ul>
+								<li>Or table. Cassandra has some confusing names around tables, keys and so on. In the end, collection of partitions.</li>
+								<li>Collection of CF. RF is set at this level. Schema or namespace.</li>
+								<li>Could be a host. Every node has a range in the partition ring, so lookups can be extremely fast.</li>
+								<li>Availability zones in AWS. Your replication strategy should be aware of this and not placing replicas on the same rack, otherwise is pointless.</li>
+								<li>Could be one in USA and another one in Ireland. RF works like a mirror, and there are CL that address this scenario.</li>
+								<li>The whole cassandra system.</li>
+							</ul>
+						</aside>
+					</section>
+					<section>
+						<h5 style="opacity:0.2">Cassandra internals</h5>
+						<h2>Storage internals: Write path</h2>
+						<ul>
+							<li>Commit log</li>
+							<li>Memtable</li>
+							<li>SSTable</li>
+							<li>Compaction</li>
+							<li>Tombstones</li>
+						</ul>
+						<aside class="notes">
+							<ul>
+								<li>Append-only structure. Serves for durability in case of crash. Kind of a backup of memtable</li>
+								<li>Second write. One per CF. Serves like a first cache for sstables</li>
+								<li>SStable are writen when memtable are full so they are flushed into disk</li>
+								<li>Merging SStables to make the read faster, to remove old data and to remove deleted data.</li>
+								<li>Those are markers for deletion, that will happen on compaction</li>
+								<li>No writes or updates in place. Append-only immutable structures allowing sequential disk or in-memory ones. Extremely fast</li>
+							</ul>
+						</aside>
+					</section>
+					<section>
+						<h5 style="opacity:0.2">Cassandra internals</h5>
+						<h2>Storage internals: Read path</h2>
+						<ul>
+							<li>Timestamps</li>
+							<li>Read from Memtable and SSTables</li>
+							<li>Caches</li>
+						</ul>
+						<aside class="notes">
+							<ul>
+								<li>It's important to have a synchronised clock in different hosts. Timestamp is used for read resolution.</li>
+								<li>It chooses last cells/colums/values depending on timestamp.</li>
+								<li>There are a lot of caches that avoid the access to disk, making reads extremely fast.</li>
+							</ul>
+						</aside>
+					</section>
+			  </section>
+
+				<section>
+				  <section>
+				    <h2>3. Data modeling</h2>
+				    <aside class="notes">
+				        <ul>
+				          <li>Without a proper data modeling Cassandra won't be able to deliver expected perfomance</li>
+				          <li>Some of the ideas from relational world are still valuable</li>
+				          <li>With this section we'll understand why Cassandra aligns with previously presented Craftsmanship concepts.</li>
+				        </ul>
+				      </aside>
+				  </section>
+				  <section>
+				    <h5 style="opacity:0.2">Data modeling</h5>
+				    <h2>Partition</h2>
+				    <ul>
+				      <li>Partition key</li>
+				      <li>Clustering key</li>
+				      <li>Primary key</li>
+				    </ul>
+				    <aside class="notes">
+				      <ul>
+				        <li>Remember that a CF is collection of partitions. Partition key defines in which node and in which unit of a CF our data is going to live</li>
+				        <li>Cassandra has the concept of nesting data. Those are cluster around this key. This key also defines the internal order of the rows inside a partition</li>
+				        <li>Primary key is composed of previous keys. That primary key ensures uniqueness of data, but through upserts.</li>
+				        <li>Table is a two-dimensional view of a multi-dimensional column family.</li>
+				      </ul>
+				    </aside>
+				  </section>
+					<section>
+				    <h5 style="opacity:0.2">Data modeling</h5>
+				    <h2>Anti patterns</h2>
+				    <ul>
+				      <li>Secondary indexes</li>
+				      <li>Join tables</li>
+				      <li>Allow filtering</li>
+				    </ul>
+				    <aside class="notes">
+				      <ul>
+				        <li>We can equality query by partition key and inequality query by clustering keys. Using secondary indexes into regular colums has a great performance penalty as it needs to go to different nodes to find the data.</li>
+				        <li>Joins are not even possible in Cassandra. You can do application joins, but those are disencouraged too.</li>
+				        <li>Kind of table scan, so only useful for development purposes</li>
+				      </ul>
+				    </aside>
+				  </section>
+					<section>
+				    <h5 style="opacity:0.2">Data modeling</h5>
+				    <h2>Conceptual Modeling</h2>
+				    <ul>
+				      <li>Entity-relationship diagrams</li>
+				      <li>Chen notation</li>
+				      <li>Technology agnostic</li>
+				    </ul>
+				    <aside class="notes">
+				      <ul>
+				        <li>Set up entities, relationships, cardinality between them and attributes.</li>
+				        <li>This analysis can be done disregarding Cassandra.</li>
+				      </ul>
+				    </aside>
+				  </section>
+					<section>
+				    <h5 style="opacity:0.2">Data modeling</h5>
+				    <h2>Logical Modeling</h2>
+				    <ul>
+				      <li>Query based approach</li>
+				      <li>Chebotko notation</li>
+				      <li>Mapping rules and patterns</li>
+				    </ul>
+				    <aside class="notes">
+				      <ul>
+				        <li>We need to think in our queries or workloads. Based on that we can define different tables for different needs</li>
+				        <li>Different cardinalities usually have same logical designs. Uniqueness, ordering and key queries are easy to extract in patterns too.</li>
+				      </ul>
+				    </aside>
+				  </section>
+					<section>
+				    <h5 style="opacity:0.2">Data modeling</h5>
+				    <h2>Physical modeling</h2>
+				    <ul>
+				      <li>Fleshing out details</li>
+				      <li>Optimizations</li>
+				    </ul>
+				    <aside class="notes">
+				      <ul>
+				        <li>Providing types for the columns</li>
+				        <li>Partition too big</li>
+				        <li>Duplication in linear growth</li>
+				        <li>Table too big or too small</li>
+				      </ul>
+				    </aside>
+				  </section>
+					<section>
+				    <h5 style="opacity:0.2">Data modeling</h5>
+				    <h2>Mindset change</h2>
+				    <ul>
+				      <li>Data consistency</li>
+				      <li>Transactions</li>
+				      <li>Concurrent access</li>
+				    </ul>
+				    <aside class="notes">
+				      <ul>
+				        <li>As we have duplications we need to keep consistent the data. You need to it at application level as Cassandra doesn't give you that. </li>
+				        <li>You could use logged batches, but they're a performance penalty.</li>
+				        <li>You could use counters or lighweight transactions. But probably the better is duplicate the data in different partitions.</li>
+				      </ul>
+				    </aside>
+				  </section>
+				</section>
+
+
+				<section>
+					<h1>Thank you</h1>
+				</section>
+
+				<section>
+					<h1>Any questions?</h1>
+				</section>
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
